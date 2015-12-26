@@ -24,6 +24,7 @@ class TomboyContentHandler(xml.sax.ContentHandler):
         self.title = ""
         self.content = ""
         self.last_change = None
+        self.notebook = None
         self.tags = []
 
     def startElement(self, name, attrs):
@@ -31,7 +32,7 @@ class TomboyContentHandler(xml.sax.ContentHandler):
         if name in ('title', 'note-content', 'last-change-date', 'tag'):
             self.in_element = name
 
-        if self.in_element is not 'note-content':
+        if self.in_element != 'note-content':
             return
 
         if name == 'list':
@@ -56,7 +57,7 @@ class TomboyContentHandler(xml.sax.ContentHandler):
         if name in ('title', 'note-content', 'last-change-date', 'tag'):
             self.in_element = None
 
-        if self.in_element is not 'note-content':
+        if self.in_element != 'note-content':
             return
 
         if name == 'list':
@@ -75,6 +76,7 @@ class TomboyContentHandler(xml.sax.ContentHandler):
             self.header_level = 0
 
     def format_characters(self, content):
+        print("format_characters", content, self.formatting)
         if not content.strip():
             return content
 
@@ -100,7 +102,11 @@ class TomboyContentHandler(xml.sax.ContentHandler):
         elif self.in_element == 'last-change-date':
             self.last_change = dateutil.parser.parse(content)
         elif self.in_element == 'tag':
-            self.tags.append(lstrip(content, "system:"))
+            tag = lstrip(content, "system:")
+            if tag.startswith("notebook:"):
+                self.notebook = lstrip(tag, "notebook:")
+            else:
+                self.tags.append(tag)
 
 def parse_note(filename):
     handler = TomboyContentHandler()
@@ -110,6 +116,7 @@ def parse_note(filename):
     return {'title': handler.title,
             'content': handler.content,
             'last_change': handler.last_change,
+            'notebook': handler.notebook,
             'tags': handler.tags}
 
 def main(args):
@@ -123,16 +130,15 @@ def main(args):
         outdir = args.outfile
         if os.path.exists(args.outfile):
             assert os.path.isdir(args.outfile)
-        else:
-            # Create directory
-            os.makedirs(args.outfile)
 
     if os.path.isdir(args.outfile):
         outdir = args.outfile
-    elif args.outfile == '-':
-        outfile = sys.stdout
-    else:
-        outfile = open(args.outfile, 'w')
+
+    if not outdir:
+        if args.outfile == '-':
+            outfile = sys.stdout
+        else:
+            outfile = open(args.outfile, 'w')
 
     for notefile in args.notes:
         note = parse_note(notefile)
@@ -141,7 +147,14 @@ def main(args):
         content += u'\n'
 
         if outdir:
-            outfile = os.path.join(outdir, note['title'] + args.suffix)
+            od = outdir
+            if note['notebook']:
+                od = os.path.join(outdir, note['notebook'])
+
+            if not os.path.isdir(od):
+                os.makedirs(od)
+
+            outfile = os.path.join(od, note['title'] + args.suffix)
             outfile = open(outfile, 'w')
 
         outfile.write(content)
