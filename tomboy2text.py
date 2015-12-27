@@ -12,6 +12,11 @@ def lstrip(string, prefix):
     else:
         return string
 
+def safe_filename(filename):
+    filename = filename.replace('/', ' ')
+    keepchars = (' ','.','_')
+    return "".join(c for c in filename if c.isalnum() or c in keepchars).rstrip()
+
 class TomboyContentHandler(xml.sax.ContentHandler):
     def __init__(self):
         xml.sax.ContentHandler.__init__(self)
@@ -147,19 +152,20 @@ def main(args):
         content += u'\n'.join(['@{}'.format(t) for t in note['tags']])
         content += u'\n'
 
-        outpath = args.outfile
-
         if outdir:
             od = outdir
             if note['notebook']:
-                od = os.path.join(outdir, note['notebook'])
+                od = os.path.join(outdir, safe_filename(note['notebook']))
 
-            outpath = os.path.join(od, note['title'] + args.suffix)
+            filename = safe_filename(note['title'] + args.suffix)
+            outpath = os.path.join(od, filename)
 
-            if not os.path.isdir(os.path.dirname(outpath)):
-                os.makedirs(os.path.dirname(outpath))
+            if not os.path.isdir(od):
+                os.makedirs(od)
 
             outfile = open(outpath, 'w')
+        else:
+            outpath = args.outfile
 
         outfile.write(content)
         if outfile is not sys.stdout:
