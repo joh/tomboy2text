@@ -34,7 +34,7 @@ class TomboyContentHandler(xml.sax.ContentHandler):
         self.tags = []
 
     def startElement(self, name, attrs):
-        print("startElement:", name)
+        #print("startElement:", name)
         if name in ('title', 'note-content', 'last-change-date', 'tag'):
             self.in_element = name
 
@@ -59,7 +59,7 @@ class TomboyContentHandler(xml.sax.ContentHandler):
             self.header_level = 2
 
     def endElement(self, name):
-        print("endElement", name)
+        #print("endElement", name)
         if name in ('title', 'note-content', 'last-change-date', 'tag'):
             self.in_element = None
 
@@ -82,7 +82,7 @@ class TomboyContentHandler(xml.sax.ContentHandler):
             self.header_level = 0
 
     def format_characters(self, content):
-        print("format_characters", content, self.formatting)
+        #print("format_characters", content, self.formatting)
         if not content.strip():
             return content
 
@@ -91,12 +91,12 @@ class TomboyContentHandler(xml.sax.ContentHandler):
         return pre + content + post
 
     def format_line(self, line):
-        print("format_line", self.header_level)
+        #print("format_line", self.header_level)
         pre = '#' * self.header_level
         return pre + line + "\n"
 
     def characters(self, content):
-        print("characters:", repr(content))
+        #print("characters:", repr(content))
         if self.in_element == 'note-content':
             if content == '\n':
                 self.content += self.format_line(self.line)
