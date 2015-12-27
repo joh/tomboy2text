@@ -146,16 +146,19 @@ def main(args):
         content += u'\n'.join(['@{}'.format(t) for t in note['tags']])
         content += u'\n'
 
+        outpath = args.outfile
+
         if outdir:
             od = outdir
             if note['notebook']:
                 od = os.path.join(outdir, note['notebook'])
 
-            if not os.path.isdir(od):
-                os.makedirs(od)
+            outpath = os.path.join(od, note['title'] + args.suffix)
 
-            outfile = os.path.join(od, note['title'] + args.suffix)
-            outfile = open(outfile, 'w')
+            if not os.path.isdir(os.path.dirname(outpath)):
+                os.makedirs(os.path.dirname(outpath))
+
+            outfile = open(outpath, 'w')
 
         outfile.write(content)
         if outfile is not sys.stdout:
