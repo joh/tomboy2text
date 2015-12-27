@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+tomboy2text: Convert Tomboy XML to plain text
+"""
 import sys
 import os
 import re
@@ -180,7 +183,7 @@ def main(args):
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser(description='Convert Tomboy notes to text')
+    parser = argparse.ArgumentParser(description='Convert Tomboy notes to plain text')
     parser.add_argument('notes', nargs='+', help='Note files')
     parser.add_argument('-o', '--outfile', default='-',
             help='Output file or directory (default: stdout)')
