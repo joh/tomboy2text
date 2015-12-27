@@ -4,6 +4,7 @@ import os
 import re
 import xml.sax
 import dateutil.parser
+import time
 
 def lstrip(string, prefix):
     if string.startswith(prefix):
@@ -163,6 +164,11 @@ def main(args):
         outfile.write(content)
         if outfile is not sys.stdout:
             outfile.close()
+
+            if note['last_change']:
+                mtime = time.mktime(note['last_change'].timetuple())
+                os.utime(outpath, (mtime, mtime))
+
 
 
 if __name__ == '__main__':
