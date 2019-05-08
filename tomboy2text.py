@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# encoding=utf8
 """
 tomboy2text: Convert Tomboy XML to plain text
 """
@@ -170,7 +171,7 @@ def main(args):
         else:
             outpath = args.outfile
 
-        outfile.write(content)
+        outfile.write(content.encode("utf-8"))
         if outfile is not sys.stdout:
             outfile.close()
 
